@@ -1,5 +1,7 @@
 "use client";
 
+import PropTypes from "prop-types";
+
 export default function CourseCard({ title, image, level, duration }) {
   return (
     <div className="group bg-white rounded-2xl shadow-md p-5 border hover:shadow-xl transition-all duration-300 cursor-pointer">
@@ -8,6 +10,7 @@ export default function CourseCard({ title, image, level, duration }) {
         <img
           src={image}
           alt={title}
+          loading="lazy"
           className="w-full h-44 object-cover group-hover:scale-110 transition duration-300"
         />
       </div>
@@ -22,9 +25,21 @@ export default function CourseCard({ title, image, level, duration }) {
         <span className="text-sm">{duration}</span>
       </div>
 
-      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition">
+      <button
+        onClick={() =>
+          window.location.href = `/courses/${title.replace(/\s+/g, "-").toLowerCase()}`
+        }
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
+      >
         Explore Course
       </button>
     </div>
   );
 }
+
+CourseCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  image: PropTypes.string.isRequired,
+  level: PropTypes.string.isRequired,
+  duration: PropTypes.string.isRequired,
+};

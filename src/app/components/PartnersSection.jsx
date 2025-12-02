@@ -1,4 +1,6 @@
+"use client";
 import { motion } from 'framer-motion';
+import { use } from 'react';
 
 const partners = [
   { id: 1, name: "British Council", logo: "/logos/british-council.png" }, // Add a logo file here

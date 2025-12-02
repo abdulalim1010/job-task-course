@@ -1,3 +1,4 @@
+"use client";
 import { motion } from 'framer-motion';
 import { FaQuoteRight, FaStar } from 'react-icons/fa';
 
