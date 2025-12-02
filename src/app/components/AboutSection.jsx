@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-// Import your images here
+// Import your images
 import imgLeft from "../../assets/center.jpg";
 import imgCenter from "../../assets/left.jpg";
 import icon from "../../assets/icon.svg";
@@ -21,11 +21,12 @@ export default function AboutSection() {
           viewport={{ once: true }}
           className="relative flex items-center justify-center"
         >
-          {/* Big Circle images */}
+          {/* Big Circle Image */}
           <div className="relative w-[350px] h-[350px] rounded-full overflow-hidden shadow-xl">
             <Image src={imgLeft} alt="Students" fill className="object-cover" />
           </div>
 
+          {/* Small Circle Image */}
           <div className="absolute right-[-40px] top-20 w-[280px] h-[280px] rounded-full border-[10px] border-white shadow-xl overflow-hidden">
             <Image src={imgCenter} alt="Student" fill className="object-cover" />
           </div>
@@ -38,7 +39,7 @@ export default function AboutSection() {
             className="absolute bottom-10 left-20 bg-white p-5 rounded-2xl shadow-md text-center"
           >
             <div className="w-14 h-14 mx-auto">
-              <Image src={icon} alt="icon" className="w-full h-full object-contain" />
+              <img src={icon.src} alt="icon" className="w-full h-full object-contain" />
             </div>
             <p className="font-semibold mt-2">Experience Advisor</p>
           </motion.div>
