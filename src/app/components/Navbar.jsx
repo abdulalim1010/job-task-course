@@ -58,7 +58,7 @@ export default function Navbar() {
           ))}
 
           <Link
-            href="/join"
+            href="/auth/register"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
           >
             Join Now
@@ -94,7 +94,7 @@ export default function Navbar() {
             ))}
 
             <Link
-              href="/join"
+              href="/register"
               onClick={() => setOpen(false)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-center transition"
             >
