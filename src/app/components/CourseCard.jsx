@@ -13,14 +13,12 @@ export default function CourseCard({
 }) {
   const router = useRouter();
 
-  // Fallback image
+  // fallback image
   const imgSrc = image || "/placeholder-course.jpg";
 
-  // Slug from title
-  const slug = title?.replace(/\s+/g, "-").toLowerCase();
-
   return (
-    <div className="group bg-white rounded-2xl shadow-md p-5 border hover:shadow-xl transition-all duration-300 cursor-pointer"
+    <div
+      className="group bg-white rounded-2xl shadow-md p-5 border hover:shadow-xl transition-all duration-300 cursor-pointer"
       onClick={() => router.push(`/courses/${_id}`)}
     >
       {/* IMAGE */}
@@ -33,7 +31,7 @@ export default function CourseCard({
       </div>
 
       {/* TITLE */}
-      <h3 className="text-xl font-bold mb-2  line-clamp-2">{title}</h3>
+      <h3 className="text-xl font-bold mb-2 line-clamp-2">{title}</h3>
 
       {/* CATEGORY */}
       <p className="text-gray-500 text-sm capitalize">{category}</p>
@@ -52,12 +50,12 @@ export default function CourseCard({
       {/* BUTTON */}
       <button
         onClick={(e) => {
-          e.stopPropagation();
+          e.stopPropagation();   // prevent card click
           router.push(`/courses/${_id}`);
         }}
         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
       >
-        vew Details
+        View Details
       </button>
     </div>
   );
