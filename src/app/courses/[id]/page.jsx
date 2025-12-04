@@ -9,14 +9,19 @@ export default function CourseDetailsPage() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // -------- Fetch Course -------- //
   useEffect(() => {
     async function fetchCourse() {
       try {
         const res = await fetch(`/api/courses/${id}`);
         const data = await res.json();
-        setCourse(data.error ? null : data);
+        if (res.ok) {
+          setCourse(data);
+        } else {
+          setCourse(null);
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching course:", err);
         setCourse(null);
       } finally {
         setLoading(false);
@@ -25,22 +30,41 @@ export default function CourseDetailsPage() {
     fetchCourse();
   }, [id]);
 
+  // -------- Handle Enroll -------- //
   const handleEnroll = () => {
+    if (!course?._id) {
+      console.error("Course ID missing");
+      return;
+    }
+
     const token = localStorage.getItem("token");
-    if (!token) router.push("/auth/login");
-    else router.push(`/courses/${id}/payment`);
+
+    if (!token) {
+      router.push(`/auth/login?redirect=/courses/${course._id}/payment`);
+    } else {
+      router.push(`/courses/${course._id}/payment`);
+    }
   };
 
+  // -------- Loading -------- //
   if (loading)
     return <p className="text-center mt-20 text-gray-500 text-lg">Loading...</p>;
-  if (!course)
-    return <p className="text-center mt-20 text-red-500 text-lg">Course not found.</p>;
 
+  // -------- Not Found -------- //
+  if (!course)
+    return (
+      <p className="text-center mt-20 text-red-500 text-lg">
+        Course not found.
+      </p>
+    );
+
+  // -------- Page UI -------- //
   return (
     <div className="max-w-7xl mx-auto px-6 py-16">
       <div className="flex flex-col lg:flex-row gap-10">
-        {/* Left: Image */}
-        <div className="lg:w-1/2 flex-shrink-0">
+
+        {/* Course Image */}
+        <div className="lg:w-1/2">
           <img
             src={course.image || "/placeholder-course.jpg"}
             alt={course.title}
@@ -48,16 +72,18 @@ export default function CourseDetailsPage() {
           />
         </div>
 
-        {/* Right: Details */}
+        {/* Course Details */}
         <div className="lg:w-1/2 flex flex-col gap-6">
-          {/* Title */}
-          <h1 className="text-4xl font-extrabold text-gray-900">{course.title}</h1>
 
-          {/* Category + Level */}
+          <h1 className="text-4xl font-extrabold text-gray-900">
+            {course.title}
+          </h1>
+
           <div className="flex flex-wrap gap-3">
             <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full capitalize">
               {course.category}
             </span>
+
             <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full capitalize">
               {course.level}
             </span>
@@ -65,13 +91,14 @@ export default function CourseDetailsPage() {
 
           {/* Price */}
           <p className="text-3xl font-bold text-gray-900">
-            Price: <span className="text-blue-600">${course.price}</span>
+            Price:{" "}
+            <span className="text-blue-600">${course.price}</span>
           </p>
 
           {/* Description */}
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-2xl font-bold mb-3">Description</h2>
-            <p className="text-gray-700 leading-relaxed">{course.description}</p>
+            <p className="text-gray-700">{course.description}</p>
           </div>
 
           {/* Instructor */}
@@ -84,8 +111,8 @@ export default function CourseDetailsPage() {
           <div className="bg-white p-6 rounded-xl shadow-md">
             <h2 className="text-2xl font-bold mb-3">Syllabus</h2>
             <ul className="list-disc pl-6 text-gray-700 space-y-2">
-              {course.syllabus?.map((item, idx) => (
-                <li key={idx}>{item}</li>
+              {course.syllabus?.map((item, i) => (
+                <li key={i}>{item}</li>
               ))}
             </ul>
           </div>
@@ -93,7 +120,8 @@ export default function CourseDetailsPage() {
           {/* Enroll Button */}
           <button
             onClick={handleEnroll}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold transition"
+            disabled={!course}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg text-lg font-semibold transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             Enroll Now
           </button>

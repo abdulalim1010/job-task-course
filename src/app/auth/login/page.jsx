@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // toggle password
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect"); // get redirect url
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -28,8 +30,16 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("studentId", data.studentId);
+
         setMessage("Login successful!");
-        router.push("/dashboard"); // Example protected page
+        // Redirect to original page if exists
+        if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push("/student/dashboard");
+        }
       } else {
         setMessage(data.message || "Login failed.");
       }
@@ -62,7 +72,7 @@ export default function LoginPage() {
             <label className="font-medium text-gray-700">Password</label>
             <input
               name="password"
-              type={showPassword ? "text" : "password"} // toggle type
+              type={showPassword ? "text" : "password"}
               value={form.password}
               onChange={handleChange}
               required

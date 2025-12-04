@@ -2,6 +2,7 @@
   "name": "job-task-course",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -12,6 +13,7 @@
     "@tsparticles/react": "^3.0.0",
     "bcryptjs": "^3.0.3",
     "cookie": "^1.1.1",
+    "dotenv": "^17.2.3",
     "framer-motion": "^12.23.25",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
@@ -21,6 +23,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "react-icons": "^5.5.0",
+    "stripe": "^20.0.0",
     "tsparticles": "^3.9.1"
   },
   "devDependencies": {

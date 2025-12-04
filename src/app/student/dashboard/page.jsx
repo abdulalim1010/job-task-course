@@ -4,54 +4,63 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function StudentDashboard() {
+  const router = useRouter();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
+  const studentId = typeof window !== "undefined" ? localStorage.getItem("studentId") : null;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/auth/login"); // protect route
+    if (!studentId) {
+      router.push("/auth/login");
       return;
     }
 
-    async function fetchCourses() {
-      const res = await fetch("/api/student/enrolled", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setCourses(data.courses || []);
-      setLoading(false);
+    async function fetchEnrollments() {
+      try {
+        const res = await fetch(`/api/student/enrollments?studentId=${studentId}`);
+        const data = await res.json();
+        setCourses(data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    fetchCourses();
-  }, [router]);
+    fetchEnrollments();
+  }, [studentId, router]);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (!courses.length) return <p className="text-center mt-10">No enrolled courses yet.</p>;
+  if (loading) return <p className="text-center mt-20 text-lg">Loading...</p>;
+  if (!courses.length) return <p className="text-center mt-20 text-lg">No courses enrolled.</p>;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-20">
-      <h1 className="text-4xl font-bold mb-10">My Courses</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <h1 className="text-3xl font-bold mb-8">My Courses</h1>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
-          <div key={course._id} className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-2xl font-bold mb-2">{course.title}</h2>
-            <p className="text-gray-600 mb-4">{course.description}</p>
-            <div className="flex items-center justify-between mb-4">
-              <span>Progress: {course.progress || 0}%</span>
-              <div className="w-32 bg-gray-200 h-2 rounded-full">
+          <div key={course._id} className="bg-white rounded-2xl shadow-md p-5 border hover:shadow-xl transition">
+            <div className="overflow-hidden rounded-xl mb-4">
+              <img src={course.image} alt={course.title} className="w-full h-44 object-cover group-hover:scale-105 transition duration-300"/>
+            </div>
+            <h3 className="text-xl font-bold mb-2 line-clamp-2">{course.title}</h3>
+            <p className="text-gray-500 text-sm capitalize mb-2">{course.category}</p>
+
+            <div className="mb-3">
+              <p className="text-sm font-medium text-gray-700">Progress: {course.progress || 0}%</p>
+              <div className="w-full bg-gray-200 h-2 rounded-full mt-1">
                 <div
                   className="bg-blue-600 h-2 rounded-full"
                   style={{ width: `${course.progress || 0}%` }}
-                />
+                ></div>
               </div>
             </div>
+
             <button
-              onClick={() => router.push(`/student/course/${course._id}`)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+              onClick={() => router.push(`/courses/${course._id}`)}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
             >
-              Go to Course
+              View Course
             </button>
           </div>
         ))}
