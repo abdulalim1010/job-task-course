@@ -6,10 +6,6 @@ export async function POST(req) {
 
     const { courseId, price } = await req.json();
 
-    if (!courseId || !price) {
-      return new Response(JSON.stringify({ error: "Missing course ID or price" }), { status: 400 });
-    }
-
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -17,19 +13,22 @@ export async function POST(req) {
         {
           price_data: {
             currency: "usd",
-            product_data: { name: `Course: ${courseId}` },
+            product_data: { name: "Course Payment" },
             unit_amount: price * 100,
           },
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/cancel`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/payment-failed`,
     });
 
-    return new Response(JSON.stringify({ url: session.url }), { status: 200 });
-  } catch (error) {
-    console.error("STRIPE ERROR:", error);
-    return new Response(JSON.stringify({ error: "Failed to create checkout session" }), { status: 500 });
+    return Response.json({ url: session.url });
+  } catch (err) {
+    console.error("STRIPE ERROR:", err);
+    return Response.json(
+      { error: err.message },
+      { status: 500 }
+    );
   }
 }

@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -16,6 +18,7 @@ export default function RegisterPage() {
     setMessage("");
 
     try {
+      // Call registration API
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -24,13 +27,27 @@ export default function RegisterPage() {
 
       const data = await res.json();
 
-      if (res.ok) {
-        setMessage("Registration successful! You can now login.");
-        setForm({ name: "", email: "", password: "" });
-      } else {
+      if (!res.ok) {
         setMessage(data.message || "Registration failed.");
+        return;
       }
+
+      // Clear old user info
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+
+      // Store new user info & JWT token
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+
+      setForm({ name: "", email: "", password: "" });
+      setMessage("Registration successful! Redirecting...");
+
+      // Redirect to student dashboard
+      setTimeout(() => router.push("/student/dashboard"), 1000);
+
     } catch (err) {
+      console.error(err);
       setMessage("Something went wrong!");
     } finally {
       setLoading(false);
@@ -87,15 +104,23 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {message && <p className="mt-4 text-center font-medium text-green-600">{message}</p>}
+        {message && (
+          <p
+            className={`mt-4 text-center font-medium ${
+              message.includes("successful") ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message}
+          </p>
+        )}
+
         <p className="mt-4 text-center text-gray-600">
-                If You have an account?{" "}
-                <Link href="/auth/login" className="text-blue-600 hover:underline">
-                  Login
-                </Link>
-              </p>
+          Already have an account?{" "}
+          <Link href="/auth/login" className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </p>
       </div>
-       
     </div>
   );
 }

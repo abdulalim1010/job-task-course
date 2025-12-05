@@ -1,3 +1,4 @@
+// Inside StudentDashboard.jsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,17 +9,30 @@ export default function StudentDashboard() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const studentId = typeof window !== "undefined" ? localStorage.getItem("studentId") : null;
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (!studentId) {
+    const storedUser = localStorage.getItem("user");
+    const token = localStorage.getItem("token");
+
+    if (!storedUser || !token) {
       router.push("/auth/login");
       return;
     }
 
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+
     async function fetchEnrollments() {
       try {
-        const res = await fetch(`/api/student/enrollments?studentId=${studentId}`);
+        const res = await fetch(`/api/student/enrollments?studentId=${parsedUser._id}`, {
+          headers: { "Authorization": `Bearer ${token}` } // optional, if your API checks JWT
+        });
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch enrollments");
+        }
+
         const data = await res.json();
         setCourses(data || []);
       } catch (err) {
@@ -29,7 +43,7 @@ export default function StudentDashboard() {
     }
 
     fetchEnrollments();
-  }, [studentId, router]);
+  }, [router]);
 
   if (loading) return <p className="text-center mt-20 text-lg">Loading...</p>;
   if (!courses.length) return <p className="text-center mt-20 text-lg">No courses enrolled.</p>;
