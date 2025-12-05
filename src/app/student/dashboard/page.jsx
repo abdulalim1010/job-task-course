@@ -1,21 +1,23 @@
-// Inside StudentDashboard.jsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BookOpen, LayoutDashboard, LogOut, User } from "lucide-react";
+import Link from "next/link";
 
 export default function StudentDashboard() {
   const router = useRouter();
   const [courses, setCourses] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [user, setUser] = useState(null);
-
+  // LOAD USER + AUTH CHECK
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
 
-    if (!storedUser || !token) {
+    if (!token || !storedUser) {
+      localStorage.clear();
       router.push("/auth/login");
       return;
     }
@@ -23,62 +25,107 @@ export default function StudentDashboard() {
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
 
-    async function fetchEnrollments() {
+    async function fetchCourses() {
       try {
         const res = await fetch(`/api/student/enrollments?studentId=${parsedUser._id}`, {
-          headers: { "Authorization": `Bearer ${token}` } // optional, if your API checks JWT
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch enrollments");
+        if (res.status === 401) {
+          localStorage.clear();
+          router.push("/auth/login");
+          return;
         }
 
         const data = await res.json();
-        setCourses(data || []);
-      } catch (err) {
-        console.error(err);
+        setCourses(data);
+      } catch (error) {
+        console.log(error);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchEnrollments();
+    fetchCourses();
   }, [router]);
 
-  if (loading) return <p className="text-center mt-20 text-lg">Loading...</p>;
-  if (!courses.length) return <p className="text-center mt-20 text-lg">No courses enrolled.</p>;
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/auth/login");
+  };
+
+  if (loading) return <p className="p-10">Loading...</p>;
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-20">
-      <h1 className="text-3xl font-bold mb-8">My Courses</h1>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <div key={course._id} className="bg-white rounded-2xl shadow-md p-5 border hover:shadow-xl transition">
-            <div className="overflow-hidden rounded-xl mb-4">
-              <img src={course.image} alt={course.title} className="w-full h-44 object-cover group-hover:scale-105 transition duration-300"/>
-            </div>
-            <h3 className="text-xl font-bold mb-2 line-clamp-2">{course.title}</h3>
-            <p className="text-gray-500 text-sm capitalize mb-2">{course.category}</p>
+    <div className="flex min-h-screen mt-32">
+      
+      {/* ------------------ SIDEBAR ------------------ */}
+      <aside className="w-64 bg-gray-900 text-white p-5 flex flex-col">
+        <h2 className="text-xl font-bold mb-6">Student Panel</h2>
 
-            <div className="mb-3">
-              <p className="text-sm font-medium text-gray-700">Progress: {course.progress || 0}%</p>
-              <div className="w-full bg-gray-200 h-2 rounded-full mt-1">
-                <div
-                  className="bg-blue-600 h-2 rounded-full"
-                  style={{ width: `${course.progress || 0}%` }}
-                ></div>
-              </div>
-            </div>
+        <nav className="flex flex-col gap-3">
+          <Link
+            href="/student/dashboard"
+            className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-md"
+          >
+            <LayoutDashboard size={18} /> Dashboard
+          </Link>
 
-            <button
-              onClick={() => router.push(`/courses/${course._id}`)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition"
+          <Link
+            href="/student/profile"
+            className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-md"
+          >
+            <User size={18} /> Profile
+          </Link>
+
+          <Link
+            href="/student/courses"
+            className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded-md"
+          >
+            <BookOpen size={18} /> My Courses
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 p-2 mt-6 bg-red-600 hover:bg-red-700 rounded-md"
+          >
+            <LogOut size={18} /> Logout
+          </button>
+        </nav>
+      </aside>
+
+      {/* ------------------ MAIN CONTENT ------------------ */}
+      <main className="flex-1 p-10 bg-gray-100">
+        <h1 className="text-3xl font-bold mb-3">Hello, {user?.name}</h1>
+        <p className="text-gray-700 mb-6">Welcome to your student dashboard!</p>
+
+        <h2 className="text-2xl font-semibold mb-4">Your Enrolled Courses</h2>
+
+        {/* Show empty state */}
+        {courses.length === 0 && (
+          <p className="text-gray-600">You have not enrolled in any course yet.</p>
+        )}
+
+        {/* COURSES LIST */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {courses.map((course) => (
+            <div
+              key={course._id}
+              className="bg-white shadow-md p-5 rounded-lg border hover:shadow-lg transition"
             >
-              View Course
-            </button>
-          </div>
-        ))}
-      </div>
+              <h3 className="text-xl font-bold">{course.courseTitle}</h3>
+              <p className="text-gray-600 mt-2 text-sm">{course.description}</p>
+
+              <Link
+                href={`/courses/${course.courseId}`}
+                className="inline-block mt-4 text-blue-600 font-medium hover:underline"
+              >
+                View Course →
+              </Link>
+            </div>
+          ))}
+        </div>
+      </main>
     </div>
   );
 }
