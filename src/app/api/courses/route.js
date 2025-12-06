@@ -7,7 +7,6 @@ export async function GET(req) {
     const db = client.db("learningPlatform");
     const courses = db.collection("courses");
 
-    // ----------- Query Params -----------
     const { searchParams } = new URL(req.url);
 
     const page = parseInt(searchParams.get("page")) || 1;
@@ -19,9 +18,8 @@ export async function GET(req) {
 
     const skip = (page - 1) * limit;
 
-    // ----------- FILTER QUERY -----------
+    // Filter query
     let query = {};
-
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -29,28 +27,15 @@ export async function GET(req) {
       ];
     }
 
-    if (category) {
-      query.category = category;
-    }
+    if (category) query.category = category;
+    if (level) query.level = level;
 
-    if (level) {
-      query.level = level;
-    }
-
-    // ----------- SORTING -----------
+    // Sort query
     let sortQuery = {};
-
     if (sort === "price_low") sortQuery.price = 1;
     if (sort === "price_high") sortQuery.price = -1;
 
-    // ----------- DB FETCH -----------
-    const data = await courses
-      .find(query)
-      .sort(sortQuery)
-      .skip(skip)
-      .limit(limit)
-      .toArray();
-
+    const data = await courses.find(query).sort(sortQuery).skip(skip).limit(limit).toArray();
     const total = await courses.countDocuments(query);
 
     return NextResponse.json({
@@ -60,12 +45,8 @@ export async function GET(req) {
       totalPages: Math.ceil(total / limit),
       courses: data,
     });
-
   } catch (error) {
     console.error("Failed to fetch courses:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch courses" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch courses" }, { status: 500 });
   }
 }

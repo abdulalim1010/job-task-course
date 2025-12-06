@@ -27,12 +27,13 @@ export async function POST(req) {
       );
     }
 
-    // JWT তে role / isAdmin যুক্ত কর
+    // ✔ JWT now contains isPremium!!
     const token = jwt.sign(
       {
         id: user._id.toString(),
         email: user.email,
-        isAdmin: user.role === "admin", // ✅ গুরুত্বপূর্ণ
+        isAdmin: user.role === "admin",
+        isPremium: user.isPremium === true, 
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }

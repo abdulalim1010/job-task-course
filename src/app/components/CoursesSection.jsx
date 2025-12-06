@@ -23,9 +23,7 @@ export default function CoursesSection() {
           { cache: "no-store" }
         );
 
-        if (!res.ok) {
-          throw new Error("Failed to load courses");
-        }
+        if (!res.ok) throw new Error("Failed to load courses");
 
         const data = await res.json();
 
@@ -46,7 +44,6 @@ export default function CoursesSection() {
   return (
     <section className="py-28 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
-
         {/* Header */}
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">
@@ -61,7 +58,7 @@ export default function CoursesSection() {
         <div className="flex flex-col md:flex-row gap-4 mb-10">
           <input
             type="text"
-            placeholder="Search by title..."
+            placeholder="Search by title or instructor..."
             value={search}
             onChange={(e) => {
               setPage(1);
@@ -101,17 +98,11 @@ export default function CoursesSection() {
         {/* Courses */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
           {loading ? (
-            <p className="text-center col-span-full text-gray-500">
-              Loading courses...
-            </p>
+            <p className="text-center col-span-full text-gray-500">Loading courses...</p>
           ) : courses.length > 0 ? (
-            courses.map((course) => (
-              <CourseCard key={course._id} {...course} />
-            ))
+            courses.map((course) => <CourseCard key={course._id} {...course} />)
           ) : (
-            <p className="text-center col-span-full text-gray-500">
-              No courses found.
-            </p>
+            <p className="text-center col-span-full text-gray-500">No courses found.</p>
           )}
         </div>
 
@@ -137,7 +128,6 @@ export default function CoursesSection() {
             Next
           </button>
         </div>
-
       </div>
     </section>
   );
