@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Home, Briefcase, BookOpen, CheckSquare, LogOut } from "lucide-react";
 import Image from "next/image";
-import logoimage from "../../../src/assets/logo.png";
+import logoimage from "../../../src/assets/logoo.png";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
